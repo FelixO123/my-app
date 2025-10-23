@@ -110,16 +110,6 @@ export default function RegistroUsuario() {
 
   return (
     <main>
-      {/* Navbar */}
-      <nav className="navbar navbar-expand-lg" style={{ fontFamily: "copperplate", backgroundColor: "#ffe07a" }} data-bs-theme="dark">
-        <div className="container-fluid">
-          <a className="navbar-brand" href="#">
-            <Image src="/images/registroUsuario/logo_empresa.jpg" width={30} height={24} alt="Logo" style={{ borderRadius: "75px" }} />
-            DATA FACTORY
-          </a>
-        </div>
-      </nav>
-
       {/* Formulario */}
       <section className="section_registro_usuario" style={{ backgroundColor: "#ffffffea", maxWidth: "800px", padding: "50px", borderRadius: "7px", width: "80%", margin: "10px auto 40px auto", color: "#000" }}>
         <Image src="/images/registroUsuario/logo_empresa.jpg" width={150} height={150} alt="Logo" className="logo_empresa" />
