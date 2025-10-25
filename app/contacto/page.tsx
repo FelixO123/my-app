@@ -72,29 +72,21 @@ export default function Contacto() {
 
   return (
     <main>
-      {/* Logo */}
-      <Image
-        src="/images/contacto/logo_empresa.jpg"
-        width={150}
-        height={150}
-        alt="Logo"
-        className="logo_empresa"
-      />
+      {/* Logo centrado */}
+      <div className="logo-container">
+        <Image
+          src="/images/contacto/logo_empresa.jpg"
+          width={150}
+          height={150}
+          alt="Logo"
+          className="logo_empresa"
+        />
+      </div>
+
       <h1 className="encabezado1">DATA FACTORY</h1>
 
       {/* Formulario */}
-      <section
-        className="section_registro_usuario mt-1"
-        style={{
-          backgroundColor: "#ffffffea",
-          maxWidth: "800px",
-          padding: "50px",
-          borderRadius: "7px",
-          width: "80%",
-          margin: "40px auto 40px auto",
-          color: "#000",
-        }}
-      >
+      <section className="section_registro_usuario">
         <h2 className="h2_registro_usuario">Formulario de Contactos</h2>
 
         <form className="form_contacto" onSubmit={handleSubmit}>
