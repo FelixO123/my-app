@@ -32,7 +32,7 @@ export default function Blog1() {
           No te pierdas esta oportunidad unica de aprender sobre una de las tecnologias mas importantes de la actualidad y el futuro, inscríbete ya en nuestro nuevo curso de Machine Learning, es totalmente gratuito.
         </p>
 
-        <Link href="/6-blogs">
+        <Link href="/blogs">
           <button className="boton1">Volver</button>
         </Link>
       </section>
