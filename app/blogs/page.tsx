@@ -78,4 +78,3 @@ export default function Blogs() {
   );
 }
 
-//probando commit 25 octubre
