@@ -20,9 +20,9 @@ export default function Blogs() {
             El 18 de septiembre se estrenará un nuevo curso para la plataforma,
             en esta oportunidad te entregamos todo el conocimiento sobre el Machine Learning y la IA
           </p>
-            <Link href="/blogs/detalleBlog1">
-                <button className="boton1">Ver</button>
-            </Link>
+          <Link href="/detalleBlog1">
+            <button className="boton1">Ver</button>
+          </Link>
         </div>
         <div className="imagen1">
           <Image
@@ -30,6 +30,7 @@ export default function Blogs() {
             width={400}
             height={250}
             alt="Curso"
+            className="imagenBlog"
           />
         </div>
       </section>
@@ -45,35 +46,34 @@ export default function Blogs() {
             El 25 de septiembre se transmitirá una nueva charla por nuestro canal de youtube,
             se aconsejará en cómo abordar un proyecto Informático desde cero
           </p>
-          <button
-            className="boton2"
-            onClick={() => window.location.href = '/blogs/detalleBlog2'}
-          >
-            Ver
-          </button>
-        </div>
+          <Link href="/detalleBlog2">
+            <button className="boton2">Ver</button>
+          </Link>
+
+      </div>
         <div className="imagen2">
           <Image
             src="/images/blogs/conferencia.jpg"
             width={400}
             height={250}
             alt="Conferencia"
+            className="imagenBlog"
           />
         </div>
-      </section>
+    </section>
 
-      {/* Footer */}
-      <footer className="footer">
-        <div className="footer-container">
-          <div className="footer-left">
-            <h3>Data Factory</h3>
-            <p>Todos los derechos reservados &copy; 2024</p>
-          </div>
-          <div className="footer-right">
-            <p>Contacto: info@datafactory.com</p>
-          </div>
-        </div>
-      </footer>
-    </main>
+      {/* Footer */ }
+  <footer className="footer">
+    <div className="footer-container">
+      <div className="footer-left">
+        <h3>Data Factory</h3>
+        <p>Todos los derechos reservados &copy; 2024</p>
+      </div>
+      <div className="footer-right">
+        <p>Contacto: info@datafactory.com</p>
+      </div>
+    </div>
+  </footer>
+    </main >
   );
 }
