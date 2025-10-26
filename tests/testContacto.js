@@ -25,16 +25,25 @@ const { Builder, By, until } = require("selenium-webdriver");
   }
 
   // Forzar vaciado de inputs React-friendly
-  async function clearReactInput(element) {
-    await element.clear();
-    await driver.executeScript(`
-      const element = arguments[0];
-      element.value = '';
-      element.dispatchEvent(new Event('change', { bubbles: true }));
-      element.dispatchEvent(new Event('input', { bubbles: true }));
-    `, element);
-    await sleep(1000);
-  }
+async function clearReactInput(element) {
+  // Click para enfocar
+  await element.click();
+  // Seleccionar todo y borrar (Ctrl+A, Backspace)
+  await element.sendKeys(
+    require('selenium-webdriver').Key.chord(
+      require('selenium-webdriver').Key.CONTROL, 'a'
+    ),
+    require('selenium-webdriver').Key.BACK_SPACE
+  );
+  // Forzar eventos para React
+  await driver.executeScript(`
+    const el = arguments[0];
+    el.value = '';
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  `, element);
+  await sleep(500);
+}
 
   try {
     // Abrir la página de contacto
