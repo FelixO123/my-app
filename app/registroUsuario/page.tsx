@@ -178,7 +178,7 @@ export default function RegistroUsuario() {
 
           <button type="submit" className="btn btn-primary mt-3">Registrar</button>
           <p className="parrafo_registro_usuario mt-3">
-            ¿Ya tienes una cuenta? <Link href="/inicio_sesion">Inicia Sesión</Link>
+            ¿Ya tienes una cuenta? <Link href="/inicioSesion">Inicia Sesión</Link>
           </p>
         </form>
       </section>
