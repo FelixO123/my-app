@@ -21,7 +21,7 @@ export default function Blogs() {
             en esta oportunidad te entregamos todo el conocimiento sobre el Machine Learning y la IA
           </p>
           <Link href="/detalleBlog1">
-            <button className="boton1">Ver</button>
+            <button id="btn-blog1" className="boton1">Ver</button>
           </Link>
         </div>
         <div className="imagen1">
@@ -47,7 +47,7 @@ export default function Blogs() {
             se aconsejará en cómo abordar un proyecto Informático desde cero
           </p>
           <Link href="/detalleBlog2">
-            <button className="boton2">Ver</button>
+            <button id="btn-blog2" className="boton2">Ver</button>
           </Link>
 
       </div>
