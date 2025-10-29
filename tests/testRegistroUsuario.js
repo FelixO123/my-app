@@ -1,194 +1,200 @@
-const { Builder, By, until } = require("selenium-webdriver");
+const { Builder, By, until, Key } = require("selenium-webdriver");
 
 (async function testRegistroUsuario() {
-  let driver = await new Builder().forBrowser("chrome").build();
+  const driver = await new Builder().forBrowser("chrome").build();
 
-  function sleep(ms) {
+  // === Configuración de velocidad ===
+  const PAUSA_GENERAL = 1200; // milisegundos entre pruebas
+  const PAUSA_ESCRITURA = 100; // milisegundos entre teclas
+  const PAUSA_ALERTA = 2500; // milisegundos que la alerta permanece visible antes de cerrarse
+
+  async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async function typeSlowly(element, text) {
-    for (let char of text) {
+  async function escribirLento(element, texto) {
+    for (const char of texto) {
       await element.sendKeys(char);
-      await sleep(80);
+      await sleep(PAUSA_ESCRITURA);
     }
   }
 
-  // Limpieza robusta para inputs controlados por React
-  async function clearReactInput(element) {
-    await driver.executeScript("arguments[0].scrollIntoView(true);", element);
-    await element.click();
-    await element.sendKeys(
-      require('selenium-webdriver').Key.chord(
-        require('selenium-webdriver').Key.CONTROL, 'a'
-      ),
-      require('selenium-webdriver').Key.BACK_SPACE
-    );
+  async function limpiarInput(element) {
+    await element.sendKeys(Key.chord(Key.CONTROL, "a"), Key.BACK_SPACE);
     await driver.executeScript(`
-      const el = arguments[0];
-      el.value = '';
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
+      arguments[0].value = "";
+      arguments[0].dispatchEvent(new Event("input", { bubbles: true }));
+      arguments[0].dispatchEvent(new Event("change", { bubbles: true }));
     `, element);
     await sleep(300);
   }
 
-  async function enviarFormulario({nombre, email, contrasena, confirmacion, telefono, region, comuna}) {
-    // Selección robusta de inputs por clase y orden
-    const inputsText = await driver.findElements(By.css("input.form-control[type='text']"));
-    const inputNombre = inputsText[0];
-    const inputEmail = await driver.findElement(By.css("input.form-control[type='email']"));
-    const inputsPassword = await driver.findElements(By.css("input.form-control[type='password']"));
-    const inputContrasena = inputsPassword[0];
-    const inputConfirmacion = inputsPassword[1];
-    const inputTelefono = await driver.findElement(By.css("input.form-control[type='number']"));
-    const selects = await driver.findElements(By.css("select.form-control"));
-    const selectRegion = selects[0];
-    const selectComuna = selects[1];
+  async function capturarAlert(mensajeEsperado = "") {
+    try {
+      await driver.wait(until.alertIsPresent(), 4000);
+      const alert = await driver.switchTo().alert();
+      const texto = await alert.getText();
+      console.log("🔔 Alert capturado:", texto);
+
+      await sleep(PAUSA_ALERTA);
+
+      if (mensajeEsperado && !texto.includes(mensajeEsperado)) {
+        console.warn("⚠️ El mensaje no coincide con lo esperado.");
+      }
+
+      await alert.accept();
+      console.log("✅ Alerta cerrada después del tiempo de visualización.");
+    } catch {
+      console.warn("⚠️ No se mostró alerta en este caso.");
+    }
+  }
+
+  // === Validar visibilidad de contraseñas ===
+  async function validarMostrarOcultarPassword() {
+    const toggleContrasena = await driver.findElement(By.css(".contraseña .form-check-input"));
+    const contrasenaInput = await driver.findElement(By.css(".contraseña input.form-control"));
+
+    const toggleConfirmacion = await driver.findElement(By.css(".confirmacion_contraseña .form-check-input"));
+    const confirmacionInput = await driver.findElement(By.css(".confirmacion_contraseña input.form-control"));
+
+    console.log("\n🔍 Validando checkbox mostrar/ocultar contraseña...");
+
+    // Contraseña
+    await toggleContrasena.click();
+    let tipo = await contrasenaInput.getAttribute("type");
+    console.log("Campo contraseña visible:", tipo === "text");
+
+    await toggleContrasena.click();
+    tipo = await contrasenaInput.getAttribute("type");
+    console.log("Campo contraseña oculto nuevamente:", tipo === "password");
+
+    // Confirmación
+    await toggleConfirmacion.click();
+    tipo = await confirmacionInput.getAttribute("type");
+    console.log("Campo confirmación visible:", tipo === "text");
+
+    await toggleConfirmacion.click();
+    tipo = await confirmacionInput.getAttribute("type");
+    console.log("Campo confirmación oculto nuevamente:", tipo === "password");
+
+    console.log("✅ Validación de mostrar/ocultar contraseña completada.\n");
+  }
+
+  async function llenarFormulario({
+    nombre,
+    email,
+    contrasena,
+    confirmacion,
+    telefono,
+    region,
+    comuna
+  }) {
+    const inputNombre = await driver.findElement(By.css(".nombre input"));
+    const inputEmail = await driver.findElement(By.css(".email input"));
+    const inputContrasena = await driver.findElement(By.css(".contraseña input.form-control"));
+    const inputConfirmacion = await driver.findElement(By.css(".confirmacion_contraseña input.form-control"));
+    const inputTelefono = await driver.findElement(By.css(".telefono input"));
+    const selectRegion = await driver.findElement(By.css(".region select"));
+    const selectComuna = await driver.findElement(By.css(".comuna select"));
     const botonRegistrar = await driver.findElement(By.css("button[type='submit']"));
 
-    // Limpiar y rellenar
-    await clearReactInput(inputNombre);
-    await typeSlowly(inputNombre, nombre);
-    await clearReactInput(inputEmail);
-    await typeSlowly(inputEmail, email);
-    await clearReactInput(inputContrasena);
-    await typeSlowly(inputContrasena, contrasena);
-    await clearReactInput(inputConfirmacion);
-    await typeSlowly(inputConfirmacion, confirmacion);
-    await clearReactInput(inputTelefono);
-    await typeSlowly(inputTelefono, telefono);
+    // Limpiar y escribir datos
+    await limpiarInput(inputNombre);
+    await escribirLento(inputNombre, nombre);
+    await limpiarInput(inputEmail);
+    await escribirLento(inputEmail, email);
+    await limpiarInput(inputContrasena);
+    await escribirLento(inputContrasena, contrasena);
+    await limpiarInput(inputConfirmacion);
+    await escribirLento(inputConfirmacion, confirmacion);
+    await limpiarInput(inputTelefono);
+    await escribirLento(inputTelefono, telefono);
 
-    // Región y comuna
-    await selectRegion.click();
-    await selectRegion.sendKeys(region);
-    await sleep(400);
-    await selectComuna.click();
-    await selectComuna.sendKeys(comuna);
-    await sleep(400);
+    // Selección de región y comuna
+    if (region) {
+      await selectRegion.click();
+      await selectRegion.sendKeys(region);
+      await sleep(500);
+    }
+    if (comuna) {
+      await selectComuna.click();
+      await selectComuna.sendKeys(comuna);
+      await sleep(500);
+    }
 
-    // Enviar
-    await botonRegistrar.click();
-    await sleep(1200);
+    // Clic seguro del botón
+    await driver.executeScript("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", botonRegistrar);
+    await sleep(800);
+
+    try {
+      await driver.wait(until.elementIsVisible(botonRegistrar), 4000);
+      await driver.wait(until.elementIsEnabled(botonRegistrar), 4000);
+      await botonRegistrar.click();
+    } catch (e) {
+      console.warn("⚠️ Primer clic falló, reintentando con JavaScript...");
+      await driver.executeScript("arguments[0].click();", botonRegistrar);
+    }
   }
 
   try {
+    console.log("🧪 Iniciando prueba de RegistroUsuario...");
     await driver.get("http://localhost:3000/registroUsuario");
-    console.log("✅ Página 'registroUsuario' abierta correctamente");
-    await sleep(1500);
+    await sleep(PAUSA_GENERAL);
 
-    // Caso exitoso
-    await enviarFormulario({
+    // Validar mostrar/ocultar contraseña
+    await validarMostrarOcultarPassword();
+
+    // === Caso exitoso ===
+    console.log("\n✅ Caso: Registro exitoso");
+    await llenarFormulario({
       nombre: "Felix Gonzalez",
-      email: "felix_registro@gmail.com",
+      email: "felix_prueba@gmail.com",
       contrasena: "Aabc1!",
       confirmacion: "Aabc1!",
       telefono: "912345678",
-      region: "Región Metropolitana",
+      region: "metropolitana",
       comuna: "Santiago"
     });
-    try {
-      await driver.wait(until.alertIsPresent(), 5000);
-      let alert = await driver.switchTo().alert();
-      console.log("🔔 Alert capturado (éxito):", await alert.getText());
-      await alert.accept();
-    } catch {}
-    await sleep(1000);
+    await capturarAlert("Formulario validado con éxito");
+    await sleep(PAUSA_GENERAL);
 
-    // Validaciones de error por campo
-    await enviarFormulario({
-      nombre: "",
-      email: "felix2@gmail.com",
-      contrasena: "Aabc1!",
-      confirmacion: "Aabc1!",
-      telefono: "912345678",
-      region: "Región Metropolitana",
-      comuna: "Santiago"
-    });
-    await sleep(500);
+    // === Casos erróneos ===
+    const casos = [
+      { desc: "Nombre vacío", data: { nombre: "", email: "correo@duoc.cl", contrasena: "Aabc1!", confirmacion: "Aabc1!", telefono: "912345678", region: "metropolitana", comuna: "Santiago" } },
+      { desc: "Correo inválido", data: { nombre: "Felix", email: "correo@dominio.com", contrasena: "Aabc1!", confirmacion: "Aabc1!", telefono: "912345678", region: "metropolitana", comuna: "Santiago" } },
+      { desc: "Contraseña insegura", data: { nombre: "Felix", email: "valido@duoc.cl", contrasena: "abc", confirmacion: "abc", telefono: "912345678", region: "metropolitana", comuna: "Santiago" } },
+      { desc: "Confirmación distinta", data: { nombre: "Felix", email: "valido2@duoc.cl", contrasena: "Aabc1!", confirmacion: "Aabc2!", telefono: "912345678", region: "metropolitana", comuna: "Santiago" } },
+      { desc: "Teléfono inválido", data: { nombre: "Felix", email: "valido3@duoc.cl", contrasena: "Aabc1!", confirmacion: "Aabc1!", telefono: "12345678", region: "metropolitana", comuna: "Santiago" } },
+      { desc: "Región vacía", data: { nombre: "Felix", email: "valido4@duoc.cl", contrasena: "Aabc1!", confirmacion: "Aabc1!", telefono: "912345678", region: "", comuna: "" } },
+      { desc: "Comuna vacía", data: { nombre: "Felix", email: "valido5@duoc.cl", contrasena: "Aabc1!", confirmacion: "Aabc1!", telefono: "912345678", region: "metropolitana", comuna: "" } }
+    ];
 
-    await enviarFormulario({
-      nombre: "Felix Gonzalez",
-      email: "correo_invalido@domain.com",
-      contrasena: "Aabc1!",
-      confirmacion: "Aabc1!",
-      telefono: "912345678",
-      region: "Región Metropolitana",
-      comuna: "Santiago"
-    });
-    await sleep(500);
-
-    await enviarFormulario({
-      nombre: "Felix Gonzalez",
-      email: "felix3@gmail.com",
-      contrasena: "abc",
-      confirmacion: "abc",
-      telefono: "912345678",
-      region: "Región Metropolitana",
-      comuna: "Santiago"
-    });
-    await sleep(500);
-
-    await enviarFormulario({
-      nombre: "Felix Gonzalez",
-      email: "felix4@gmail.com",
-      contrasena: "Aabc1!",
-      confirmacion: "Aabc2!",
-      telefono: "912345678",
-      region: "Región Metropolitana",
-      comuna: "Santiago"
-    });
-    await sleep(500);
-
-    await enviarFormulario({
-      nombre: "Felix Gonzalez",
-      email: "felix5@gmail.com",
-      contrasena: "Aabc1!",
-      confirmacion: "Aabc1!",
-      telefono: "12345678",
-      region: "Región Metropolitana",
-      comuna: "Santiago"
-    });
-    await sleep(500);
-
-    await enviarFormulario({
-      nombre: "Felix Gonzalez",
-      email: "felix6@gmail.com",
-      contrasena: "Aabc1!",
-      confirmacion: "Aabc1!",
-      telefono: "912345678",
-      region: "",
-      comuna: ""
-    });
-    await sleep(500);
-
-    await enviarFormulario({
-      nombre: "Felix Gonzalez",
-      email: "felix7@gmail.com",
-      contrasena: "Aabc1!",
-      confirmacion: "Aabc1!",
-      telefono: "912345678",
-      region: "Región Metropolitana",
-      comuna: ""
-    });
-    await sleep(500);
-
-    // Validar redirección a inicio de sesión
-    const linkInicioSesion = await driver.findElement(By.linkText("Inicia Sesión"));
-    await driver.executeScript("arguments[0].scrollIntoView(true);", linkInicioSesion);
-    await linkInicioSesion.click();
-    await sleep(1000);
-    const url = await driver.getCurrentUrl();
-    if (url.includes("/inicioSesion")) {
-      console.log("✅ Redirección a inicio de sesión exitosa");
-    } else {
-      console.error("❌ Redirección a inicio de sesión fallida");
+    for (const caso of casos) {
+      console.log(`\n⚙️ Caso: ${caso.desc}`);
+      await llenarFormulario(caso.data);
+      await capturarAlert();
+      await sleep(PAUSA_GENERAL);
     }
 
-    console.log("✅ Test de registro de usuario completado");
-  } catch (error) {
-    console.error("❌ Error durante la prueba de registro:", error);
+    // Validar redirección
+    console.log("\n🔗 Validando redirección a inicio de sesión...");
+    const link = await driver.findElement(By.linkText("Inicia Sesión"));
+    await driver.executeScript("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", link);
+    await sleep(800);
+    await link.click();
+    await sleep(1500);
+    const urlActual = await driver.getCurrentUrl();
+    if (urlActual.includes("/inicioSesion")) {
+      console.log("✅ Redirección a /inicioSesion correcta");
+    } else {
+      console.error("❌ Error en redirección. URL actual:", urlActual);
+    }
+
+    console.log("\n🎉 Prueba completa sin errores críticos.");
+  } catch (err) {
+    console.error("❌ Error en la ejecución del test:", err);
   } finally {
+    await sleep(2000);
     await driver.quit();
   }
 })();
