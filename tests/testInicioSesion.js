@@ -71,7 +71,7 @@ async function slowType(element, text, delay = 150) {
     await driver.executeScript(`
       alert("✅ Registro exitoso. Se probará el inicio de sesión con:\\n\\nEmail: ${email}\\nContraseña: ${password}");
     `);
-    await driver.sleep(4000); // 👈 pausa para leer alerta
+    await driver.sleep(4000);
     try { await driver.switchTo().alert().accept(); } catch {}
 
     // 2️⃣ Inicio de sesión correcto
@@ -91,7 +91,7 @@ async function slowType(element, text, delay = 150) {
     const alertLogin = await driver.switchTo().alert();
     const textoLogin = await alertLogin.getText();
     console.log("📢 Alerta login:", textoLogin);
-    await driver.sleep(4000); // 👈 pausa
+    await driver.sleep(4000);
     await alertLogin.accept();
 
     if (textoLogin.toLowerCase().includes("exitoso")) {
@@ -120,7 +120,7 @@ async function slowType(element, text, delay = 150) {
       const alertLoginFail = await driver.switchTo().alert();
       const textoLoginFail = await alertLoginFail.getText();
       console.log("📢 Alerta login (fallido):", wrongEmail);
-      await driver.sleep(4000); // 👈 pausa
+      await driver.sleep(4000);
       await alertLoginFail.accept();
 
       if (
@@ -157,7 +157,7 @@ async function slowType(element, text, delay = 150) {
       const alertWrongPwd = await driver.switchTo().alert();
       const textoWrongPwd = await alertWrongPwd.getText();
       console.log("📢 Alerta login (contraseña incorrecta):", wrongPassword);
-      await driver.sleep(4000); // 👈 pausa
+      await driver.sleep(4000);
       await alertWrongPwd.accept();
 
       if (
@@ -171,6 +171,40 @@ async function slowType(element, text, delay = 150) {
       }
     } catch (e) {
       console.error("❌ Error interno durante la prueba de contraseña incorrecta:", e.message);
+    }
+
+    // ✅ 5️⃣ Validación de enlace “Regístrate”
+    try {
+      console.log("\n🔗 Verificando enlace 'Regístrate' desde la página de inicio de sesión...");
+
+      await driver.get("http://localhost:3000/inicioSesion");
+      await driver.wait(until.elementLocated(By.css("form.form_inicio_sesion")), 10000);
+
+      let enlaceRegistro;
+      try {
+        enlaceRegistro = await driver.findElement(By.linkText("Regístrate"));
+      } catch {
+        enlaceRegistro =
+          (await driver.findElement(By.partialLinkText("Regístrate")).catch(async () => {
+            return await driver.findElement(By.css("a[href='/registroUsuario']"));
+          })) || null;
+      }
+
+      if (!enlaceRegistro) throw new Error("No se encontró el enlace 'Regístrate'");
+
+      await enlaceRegistro.click();
+      await driver.wait(until.urlContains("/registroUsuario"), 7000);
+
+      const currentUrl = await driver.getCurrentUrl();
+      if (currentUrl.includes("/registroUsuario")) {
+        console.log("✅ TEST PASADO: El enlace 'Regístrate' redirige correctamente a /registroUsuario");
+      } else {
+        console.warn("⚠️ TEST INCOMPLETO: URL inesperada tras hacer clic en 'Regístrate' →", currentUrl);
+      }
+
+      await driver.sleep(2000);
+    } catch (e) {
+      console.error("❌ Error durante la validación del enlace 'Regístrate':", e.message);
     }
 
     await driver.sleep(3000);
