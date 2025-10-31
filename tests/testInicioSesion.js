@@ -3,7 +3,7 @@ const { Builder, By, until } = require("selenium-webdriver");
 const chrome = require("selenium-webdriver/chrome");
 const { Select } = require("selenium-webdriver/lib/select");
 
-// 🕒 Función auxiliar para escribir más lento (simula tecleo humano)
+// 🕒 Función auxiliar para simular tecleo humano
 async function slowType(element, text, delay = 150) {
   for (const char of text) {
     await element.sendKeys(char);
@@ -24,36 +24,44 @@ async function slowType(element, text, delay = 150) {
 
   try {
     console.log("🚀 Iniciando prueba automática (modo visual lento)...");
+    console.log("📧 Email:", email);
+    console.log("🔑 Contraseña:", password);
 
-    // 1️⃣ Página de registro
+    // 1️⃣ Ir a la página de registro
     await driver.get("http://localhost:3000/registroUsuario");
     await driver.wait(until.elementLocated(By.css("form.form_registro_usuario")), 10000);
     await driver.sleep(1000);
 
-    // 2️⃣ Llenar formulario con pausas visibles
-    const nombreInput = await driver.findElement(By.css(".nombre input"));
-    await slowType(nombreInput, nombre);
-    await driver.sleep(500);
+    // 2️⃣ Completar formulario paso a paso
+    await slowType(await driver.findElement(By.css(".nombre input")), nombre);
+    await driver.sleep(300);
 
-    const emailInput = await driver.findElement(By.css(".email input"));
-    await slowType(emailInput, email);
-    await driver.sleep(500);
+    await slowType(await driver.findElement(By.css(".email input")), email);
+    await driver.sleep(300);
 
     const contrasenaInput = await driver.findElement(By.css(".contraseña input.form-control"));
+    const mostrarPassCheck = await driver.findElement(By.css(".contraseña .form-check-input"));
+    await mostrarPassCheck.click(); // activar checkbox
+    await driver.sleep(300);
+
+    console.log(`🔐 Escribiendo contraseña de registro: ${password}`);
     await slowType(contrasenaInput, password);
-    await driver.sleep(500);
+    await driver.sleep(300);
 
     const confirmInput = await driver.findElement(By.css(".confirmacion_contraseña input.form-control"));
+    const mostrarConfirmCheck = await driver.findElement(By.css(".confirmacion_contraseña .form-check-input"));
+    await mostrarConfirmCheck.click(); // activar checkbox
+    await driver.sleep(300);
+
+    console.log(`🔁 Confirmando contraseña: ${password}`);
     await slowType(confirmInput, password);
-    await driver.sleep(500);
+    await driver.sleep(300);
 
-    const telefonoInput = await driver.findElement(By.css(".telefono input"));
-    await slowType(telefonoInput, "912345678");
-    await driver.sleep(500);
+    await slowType(await driver.findElement(By.css(".telefono input")), "912345678");
+    await driver.sleep(300);
 
-    // Región y comuna
+    // Seleccionar región y comuna
     const regionSelectEl = await driver.findElement(By.css(".region select"));
-    await driver.wait(until.elementIsEnabled(regionSelectEl), 5000);
     const regionSelect = new Select(regionSelectEl);
     await regionSelect.selectByValue("metropolitana");
     await driver.sleep(1000);
@@ -62,7 +70,7 @@ async function slowType(element, text, delay = 150) {
     const comunaSelectEl = await driver.findElement(By.css(".comuna select"));
     const comunaSelect = new Select(comunaSelectEl);
     await comunaSelect.selectByValue("Santiago");
-    await driver.sleep(1000);
+    await driver.sleep(500);
 
     // 3️⃣ Enviar registro
     const registrarBtn = await driver.findElement(By.css("button.btn.btn-primary"));
@@ -74,25 +82,42 @@ async function slowType(element, text, delay = 150) {
     const alertRegistro = await driver.switchTo().alert();
     const textoRegistro = await alertRegistro.getText();
     console.log("📢 Alerta registro:", textoRegistro);
-    await driver.sleep(1000);
     await alertRegistro.accept();
     await driver.sleep(1000);
 
-    if (!textoRegistro.toLowerCase().includes("exito") && !textoRegistro.toLowerCase().includes("validado")) {
+    // ✅ Validación más flexible
+    if (
+      !textoRegistro.toLowerCase().includes("éxito") &&
+      !textoRegistro.toLowerCase().includes("validado")
+    ) {
       throw new Error("Registro inválido: " + textoRegistro);
     }
+
+    // Mostrar aviso visual
+    await driver.executeScript(`
+      alert("✅ Registro exitoso. Ahora se probará el inicio de sesión con:\\n\\nEmail: ${email}\\nContraseña: ${password}");
+    `);
+    await driver.sleep(3000);
+    try { await driver.switchTo().alert().accept(); } catch {}
 
     // 5️⃣ Ir a inicio de sesión
     await driver.get("http://localhost:3000/inicioSesion");
     await driver.wait(until.elementLocated(By.css("form.form_inicio_sesion")), 10000);
     await driver.sleep(1000);
 
-    // 6️⃣ Ingresar credenciales lentamente
+    // 6️⃣ Ingresar credenciales
     const loginEmail = await driver.findElement(By.css(".correo input.form-control"));
     const loginPass = await driver.findElement(By.css(".contraseña input.form-control"));
+    const mostrarPassLoginCheck = await driver.findElement(By.css(".contraseña .form-check-input"));
 
     await slowType(loginEmail, email);
     await driver.sleep(500);
+
+    // Activar checkbox "Mostrar contraseña"
+    await mostrarPassLoginCheck.click();
+    await driver.sleep(300);
+
+    console.log(`🔓 Escribiendo contraseña en inicio de sesión: ${password}`);
     await slowType(loginPass, password);
     await driver.sleep(500);
 
@@ -101,12 +126,11 @@ async function slowType(element, text, delay = 150) {
     await loginBtn.click();
     await driver.sleep(800);
 
-    // 8️⃣ Alerta de login
+    // 8️⃣ Capturar alerta de login
     await driver.wait(until.alertIsPresent(), 7000);
     const alertLogin = await driver.switchTo().alert();
     const textoLogin = await alertLogin.getText();
     console.log("📢 Alerta login:", textoLogin);
-    await driver.sleep(1000);
     await alertLogin.accept();
 
     if (textoLogin.toLowerCase().includes("exitoso")) {
@@ -115,7 +139,7 @@ async function slowType(element, text, delay = 150) {
       throw new Error("Inicio de sesión falló: " + textoLogin);
     }
 
-    await driver.sleep(2000); // tiempo extra para ver la pantalla final
+    await driver.sleep(3000);
   } catch (err) {
     console.error("💥 Error en el test:", err);
     await driver.sleep(3000);
