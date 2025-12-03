@@ -29,7 +29,7 @@ export default function Nosotros() {
       </section>
 
       {/* Footer */}
-      <footer className="footer">
+      <footer className="footer2">
         <p>&copy; 2024 Data Factory. Todos los derechos reservados.</p>
       </footer>
     </main>

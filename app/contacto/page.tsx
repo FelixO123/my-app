@@ -71,11 +71,11 @@ export default function Contacto() {
   };
 
   return (
-    <main>
+    <body>
       {/* Logo centrado */}
       <div className="logo-container">
         <Image
-          src="/images/contacto/logo_empresa.jpg"
+          src="/logo_empresa.jpg"
           width={150}
           height={150}
           alt="Logo"
@@ -131,6 +131,6 @@ export default function Contacto() {
           </button>
         </form>
       </section>
-    </main>
+    </body>
   );
 }

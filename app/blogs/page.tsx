@@ -1,80 +1,36 @@
-"use client";
+'use client';
+import styles from "./blogs.module.css";
+import { useRouter } from "next/navigation";
 
-import "../../styles/blogs.css";
-import Image from "next/image";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Link from "next/link";
-
-export default function Blogs() {
+export default function BlogsPage() {
+  const router = useRouter();
   return (
-    <main>
+    <div>
+      <h1 className={styles.encabezado1}>BLOGS</h1>
 
-
-      <h1 className="encabezado1">BLOGS</h1>
-
-      {/* Sección 1 */}
-      <section className="seccion1">
-        <div>
-          <h1 className="texto1">Nuevo Curso de Machine Learning</h1>
-          <p className="texto1">
-            El 18 de septiembre se estrenará un nuevo curso para la plataforma,
-            en esta oportunidad te entregamos todo el conocimiento sobre el Machine Learning y la IA
-          </p>
-          <Link href="/detalleBlog1">
-            <button id="btn-blog1" className="boton1">Ver</button>
-          </Link>
+      {/* Card Blog 1 */}
+      <section className={styles["blog-card"]}>
+        <div style={{ flex: 1 }}>
+          <h1 style={{ color: '#fff', fontSize: '2rem', marginBottom: 12 }}>Nuevo Curso de Machine Learning</h1>
+          <p style={{ color: '#fff', fontSize: '1.1rem' }}>El 18 de septiembre se estrenara un nuevo curso para la plataforma, en esta oportunidad te entregamos todo el conocimiento sobre el Machine Learning y la IA</p>
+          <button className={styles.boton1} onClick={() => router.push('/detalleBlog1')}>Ver</button>
         </div>
-        <div className="imagen1">
-          <Image
-            src="/images/blogs/curso.jpg"
-            width={400}
-            height={250}
-            alt="Curso"
-            className="imagenBlog"
-          />
+        <div>
+          <img src="/curso.jpg" alt="Logo" className={styles.imagen1} />
         </div>
       </section>
 
-      {/* Sección 2 */}
-      <section className="seccion2">
-        <div>
-          <h1 className="texto2">
-            Conferencia exclusiva por nuestro canal de youtube: ¿Como Empezar
-            Un Proyecto Informático Desde Cero?
-          </h1>
-          <p className="texto2">
-            El 25 de septiembre se transmitirá una nueva charla por nuestro canal de youtube,
-            se aconsejará en cómo abordar un proyecto Informático desde cero
-          </p>
-          <Link href="/detalleBlog2">
-            <button id="btn-blog2" className="boton2">Ver</button>
-          </Link>
-
-      </div>
-        <div className="imagen2">
-          <Image
-            src="/images/blogs/conferencia.jpg"
-            width={400}
-            height={250}
-            alt="Conferencia"
-            className="imagenBlog"
-          />
+      {/* Card Blog 2 */}
+      <section className={styles["blog-card"]}>
+        <div style={{ flex: 1 }}>
+          <h1 style={{ color: '#fff', fontSize: '2rem', marginBottom: 12 }}>Conferencia exclusiva por nuestro canal de youtube: ¿Como Empezar Un Proyecto Informático Desde Cero?</h1>
+          <p style={{ color: '#fff', fontSize: '1.1rem' }}>El 25 de septiembre se transmitira una nueva charla por nuestro canal de youtube, se aconsejara en como abordar un proyecto Informático desde cero</p>
+          <button className={styles.boton2} onClick={() => router.push('/detalleBlog2')}>Ver</button>
         </div>
-    </section>
-
-      {/* Footer */ }
-  <footer className="footer">
-    <div className="footer-container">
-      <div className="footer-left">
-        <h3>Data Factory</h3>
-        <p>Todos los derechos reservados &copy; 2024</p>
-      </div>
-      <div className="footer-right">
-        <p>Contacto: info@datafactory.com</p>
-      </div>
+        <div>
+          <img src="/conferencia.jpg" alt="Logo" className={styles.imagen2} />
+        </div>
+      </section>
     </div>
-  </footer>
-    </main >
   );
 }
-
